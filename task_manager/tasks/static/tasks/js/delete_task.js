@@ -1,26 +1,23 @@
-$(document).ready(function() {
-    // Attach click event handler to buttons with class 'del-btn'
-    $(document).on('click', '.del-btn', function() {
-        var projectId = $(this).closest('tr').find('.project-id').text().trim();
+function delete_task(button, task_id) {
 
-        // Fetch CSRF token
-        var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+    const url = window.location.href + task_id;
 
-        $.ajax({
-            type: 'DELETE',
-            url: `/projects/${projectId}/`,
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
-            success: function(response) {
-                // Remove the deleted project row from the table
-                $(`#projectsTable tbody tr:contains(${projectId})`).remove();
-            },
-            error: function(error) {
-                console.error('Error:', error);
-            }
-        });
+    var csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+
+    $.ajax({
+        type: 'DELETE',
+        url: url,
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function(response) {
+             $(button).closest('tr').remove();
+        },
+        error: function(error) {
+            console.error('Error:', error);
+        }
     });
-});
+}
+
 
 

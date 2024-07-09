@@ -1,8 +1,11 @@
 $(document).ready(function() {
-    $('#projectForm').submit(function(event) {
+    $('#taskForm').submit(function(event) {
         event.preventDefault();  // Запобігаємо стандартній відправці форми
         const formData = {
-            project: $('#project').val()  // Отримуємо значення з поля вводу
+            name: $('#task-name').val(),
+            status: $('#task-status').val(),
+            deadline: $('#task-deadline').val(),
+            priority: $('#task-priority').val()
         };
         $.ajax({
             type: 'POST',
@@ -16,17 +19,19 @@ $(document).ready(function() {
                 // Обробка успішного відповіді
                 const newRow = `
                     <tr>
-                        <td class="project-id">${data.id}</td>
                         <td>${data.name}</td>
+                        <td>${data.status}</td>
+                        <td>${data.deadline}</td>
+                        <td>${data.priority}</td>
                         <td>
                             <button class="btn btn-sm mb-2 edit-btn"><i class="fas fa-pencil-alt"></i></button>
                             <button class="btn btn-sm mb-2 del-btn"><i class="fas fa-trash"></i></button>
-                            <button class="btn btn-sm mb-2" onclick="location.href='${data.id}/tasks'"><i class="fas fa-info-circle"></i></button>
                         </td>
                     </tr>
                 `;
-                $('#projectsTable tbody').append(newRow);
-                $('#projectForm')[0].reset();  // Скидаємо поля форми після успішної відправки
+                $('#tasksTable tbody').append(newRow);
+                $('#taskForm')[0].reset();  // Скидаємо поля форми після успішної відправки
+                sortTableByPriority()
             },
             error: function(error) {
                 console.error('Error:', error);
