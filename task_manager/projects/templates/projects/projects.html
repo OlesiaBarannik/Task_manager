@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}  {# Add this line to load the static tag library #}
+
+{% block title %}
+Projects
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <h1 class="mt-5">Projects</h1>
+    <form id="projectForm">
+        {% csrf_token %}
+        <input type="text" name="project" id="project" placeholder="Enter project name">
+        <button type="submit">Create Project</button>
+    </form>
+    <!-- Таблиця для відображення списку проектів -->
+    <table class="table" id="projectsTable">
+        <tbody>
+        {% for project in projects %}
+        <tr>
+            <td class="project-id" onclick="location.href='{{ project.id }}/tasks'">{{ project.id }}</td>
+            <td>{{ project.name }}</td>
+            <td>
+                <button class="btn btn-primary btn-sm edit-btn">
+                    <i class="fas fa-pencil-alt"></i> Edit
+                </button>
+                <button class="btn btn-danger btn-sm" name="delete">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% block extrajs %}
+<script src="{% static 'projects/js/project_form.js' %}"></script>
+<script src="{% static 'projects/js/edit_project.js' %}"></script>
+{% endblock %}
+
+{% endblock %}
