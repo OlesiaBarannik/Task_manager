@@ -1,10 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block title %}
+Tasks
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="container mt-3">
+    <h2>Tasks</h2>
+    <a href="/projects/">Back to projects</a>
+    <form action="./" id="taskForm">
+        {% csrf_token %}
+        <div class="mb-3 mt-3">
+            <div class="row">
+                <div class="col-md-2 mt-2">
+                    <input type="text" class="form-control" name="task-name" id="task-name" placeholder="Enter task name">
+                </div>
+                <div class="col-md-2 mt-2">
+                    <select class="form-control" name="task-status" id="task-status">
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mt-2">
+                    <input type="date" class="form-control" name="task-deadline" id="task-deadline">
+                </div>
+
+                <div class="col-md-2 mt-2">
+                    <input type="number" class="form-control" name="task-priority" id="task-priority" min="1" max="1000" placeholder="Enter task priority">
+                </div>
+                <div class="col-md-2 mt-2">
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+    <!-- Table for displaying the list of tasks -->
+    <table class="table table-hover" id="tasksTable">
+        <thead>
+            <tr>
+                <th style="width: 25%;">name</th>
+                <th style="width: 22%;">status</th>
+                <th style="width: 23%;">deadline</th>
+                <th style="width: 5%;">priority</th>
+                <th style="width: 25%; text-align: right;">actions</th>
+                <th hidden></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for task in tasks_list %}
+        <tr>
+            <td>{{ task.name }}</td>
+            <td>{{ task.status }}</td>
+            <td>{{ task.deadline|date:"Y-m-d" }}</td>
+            <td>{{ task.priority }}</td>
+            <td style="text-align: right;">
+                <button class="btn btn-sm mb-2 edit-btn">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="btn btn-sm mb-2 del-btn" onclick="delete_task(this, '{{ task.id }}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+            <td hidden>{{ task.id }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+{% block extrajs %}
+<script src="{% static 'tasks/js/sort_table.js' %}"></script>
+<script src="{% static 'tasks/js/add_task.js' %}"></script>
+<script src="{% static 'tasks/js/edit_task.js' %}"></script>
+<script src="{% static 'tasks/js/delete_task.js' %}"></script>
+{% endblock %}
+
+{% endblock %}
