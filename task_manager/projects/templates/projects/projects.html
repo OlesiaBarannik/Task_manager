@@ -1,32 +1,46 @@
 {% extends 'base.html' %}
-{% load static %}  {# Add this line to load the static tag library #}
+{% load static %}
 
 {% block title %}
 Projects
 {% endblock %}
 
 {% block content %}
-
 <div class="container">
-    <h1 class="mt-5">Projects</h1>
-    <form id="projectForm">
-        {% csrf_token %}
-        <input type="text" name="project" id="project" placeholder="Enter project name">
-        <button type="submit">Create Project</button>
-    </form>
-    <!-- Таблиця для відображення списку проектів -->
-    <table class="table" id="projectsTable">
+
+    <div class="container mt-3">
+        <h2>Projects</h2>
+        <form action="/projects/" id="projectForm">
+            {% csrf_token %}
+            <div class="mb-3 mt-3 input-group">
+                <input type="text" class="form-control" name="project" id="project" placeholder="Enter project name">
+                <button type="submit" class="btn btn-primary">Create Project</button>
+            </div>
+        </form>
+    </div>
+    <!-- Table for displaying the list of projects -->
+    <table class="table table-hover" id="projectsTable">
+        <thead>
+            <tr>
+                <th style="width: 10%;"></th>
+                <th style="width: 60%;"></th>
+                <th style="width: 30%;"></th>
+            </tr>
+        </thead>
         <tbody>
-        {% for project in projects %}
+        {% for project in project_list %}
         <tr>
-            <td class="project-id" onclick="location.href='{{ project.id }}/tasks'">{{ project.id }}</td>
+            <td class="project-id">{{ project.id }}</td>
             <td>{{ project.name }}</td>
-            <td>
-                <button class="btn btn-primary btn-sm edit-btn">
-                    <i class="fas fa-pencil-alt"></i> Edit
+            <td style="text-align: right;">
+                <button class="btn btn-sm mb-2 edit-btn">
+                    <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="btn btn-danger btn-sm" name="delete">
-                    <i class="fas fa-trash"></i> Delete
+                <button class="btn btn-sm mb-2 del-btn">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-sm mb-2" onclick="location.href='{{ project.id }}/tasks'">
+                    <i class="fas fa-info-circle"></i>
                 </button>
             </td>
         </tr>
@@ -36,9 +50,11 @@ Projects
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
 {% block extrajs %}
-<script src="{% static 'projects/js/project_form.js' %}"></script>
+<script src="{% static 'projects/js/add_project.js' %}"></script>
 <script src="{% static 'projects/js/edit_project.js' %}"></script>
+<script src="{% static 'projects/js/delete_project.js' %}"></script>
 {% endblock %}
 
 {% endblock %}
