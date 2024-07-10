@@ -19,6 +19,7 @@ class ProjectView(View):
         if request.headers.get('Content-Type') == 'application/json':
             return JsonResponse(project_list, safe=False)
         return render(request, 'projects/projects.html', {'project_list': project_list})
+
     def post(self, request):
         data = json.loads(request.body)
         name = data.get('project')
