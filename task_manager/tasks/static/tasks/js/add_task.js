@@ -23,10 +23,11 @@ $(document).ready(function() {
                         <td>${data.status}</td>
                         <td>${data.deadline}</td>
                         <td>${data.priority}</td>
-                        <td>
+                        <td style="text-align: right;">
                             <button class="btn btn-sm mb-2 edit-btn"><i class="fas fa-pencil-alt"></i></button>
-                            <button class="btn btn-sm mb-2 del-btn"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm mb-2 del-btn" onclick="delete_task(this, '${data.id}')"><i class="fas fa-trash"></i></button>
                         </td>
+                        <td hidden>${data.id}</td>
                     </tr>
                 `;
                 $('#tasksTable tbody').append(newRow);
