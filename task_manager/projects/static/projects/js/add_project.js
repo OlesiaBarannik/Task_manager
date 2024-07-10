@@ -16,9 +16,9 @@ $(document).ready(function() {
                 // Обробка успішного відповіді
                 const newRow = `
                     <tr>
-                        <td class="project-id">${data.id}</td>
+                        <td class="project-id" hidden>${data.id}</td>
                         <td>${data.name}</td>
-                        <td>
+                        <td style="text-align: right;">
                             <button class="btn btn-sm mb-2 edit-btn"><i class="fas fa-pencil-alt"></i></button>
                             <button class="btn btn-sm mb-2 del-btn"><i class="fas fa-trash"></i></button>
                             <button class="btn btn-sm mb-2" onclick="location.href='${data.id}/tasks'"><i class="fas fa-info-circle"></i></button>
