@@ -1,0 +1,53 @@
+{% for task in task_list %}
+<div class="row project{{ task.project_id }}task{{ task.id }}">
+    <input type="date" name="deadline_{{ task.id }}" id="deadline_{{ task.id }}" value="{{ task.deadline|date:'Y-m-d' }}" hidden>
+    <div class="col-2" style="border: 1px solid blue;">
+        <input type="hidden" name="status_{{ task.id }}" value="{% if task.status == 'done' %}done{% else %}not_done{% endif %}">
+        <input type="checkbox" id="checkbox_{{ task.id }}" {% if task.status == 'done' %} checked {% endif %}>
+    </div>
+
+    <div class="col-7 col-md-8 col-lg-8" style="border: 1px solid blue;">
+        <span id="taskName_{{ task.id }}">{{ task.name }}</span>
+    </div>
+    <div class="col-3 col-md-2 col-lg-1" style="border: 1px solid blue;">
+        <div class="d-flex justify-content-end align-items-center" style="margin: 0 2px; align-items: center;">
+            <div class="col-auto p-0" style="align-content: center;">
+                <span class="btn p-0 m-0" data-bs-toggle="modal" data-bs-target="#myModal" data-task-id="{{ task.id }}" data-project-id="{{ task.project_id }}">&#x270E;</span>
+            </div>
+            <div class="col-auto p-0" style="align-content: center">
+                <span class="btn p-0 m-0" hx-delete="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}task{{ task.id }}" hx-swap="delete" hx-trigger="click" >&#x1F5D1;</span>
+            </div>
+            <div class="col-auto p-0" style="align-content: center">
+                <div class="btn p-0 m-0" style="line-height: 0.8;">
+                    <span hx-patch="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}tasks" hx-swap="innerHTML" hx-trigger="click" hx-vals='{"priority_up": {{ task.priority }} }' style="display: block;">&#9650;</span>
+                    <span hx-patch="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}tasks" hx-swap="innerHTML" hx-trigger="click" hx-vals='{"priority_down": {{ task.priority }} }' style="display: block;">&#9660;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+document.getElementById('checkbox_{{ task.id }}').addEventListener('change', function() {
+    var hiddenInput = document.querySelector('input[name="status_{{ task.id }}"]');
+    if (this.checked) {
+        hiddenInput.value = 'done';
+    } else {
+        hiddenInput.value = 'in_progress';
+    }
+
+    htmx.ajax('PATCH', '{{ task.project_id }}/tasks/{{ task.id }}', {
+        target: '#response',
+        swap: 'outerHTML',
+        values: { status: hiddenInput.value }
+    });
+});
+</script>
+{% endfor %}
+
+
+
+
