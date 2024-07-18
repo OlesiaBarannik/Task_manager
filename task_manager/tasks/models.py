@@ -1,14 +1,12 @@
 from django.db import models
 from projects.models import Project
-
+from django.core.exceptions import ValidationError
 
 class Task(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
         ('in_progress', 'In Progress'),
         ('done', 'Done'),
     ]
-
 
     id = models.AutoField(primary_key=True)
     project = models.ForeignKey(Project, related_name="tasks", on_delete=models.CASCADE)
@@ -16,7 +14,6 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     deadline = models.DateField(null=True, blank=True)
     priority = models.IntegerField(default=1)
-
 
 
     class Meta:
@@ -56,6 +53,16 @@ class Task(models.Model):
         self.deadline = data.get('deadline', self.deadline)
         self.priority = data.get('priority', self.priority)
         self.save()
+
+    @staticmethod
+    def validate_task_name_within_project(project_id, name, id=None):
+        tasks = Task.objects.filter(project_id=project_id, name=name)
+        if id is not None:
+            tasks = tasks.exclude(id=id)
+
+        if tasks.exists():
+            raise ValidationError("Task with that name already exists for this object.")
+
 
     def __str__(self):
         return self.name
