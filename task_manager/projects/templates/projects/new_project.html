@@ -1,0 +1,41 @@
+<div class="row project-container-{{ project.id }}">
+<div class="row pt-5">
+    <div class="col-12 col-md-12 col-lg-11 d-flex align-items-center" id="project-name-container-{{ project.id }}" style="border: 1px solid blue; background-color: blue; color: white;">
+        <div class="col-7 col-md-9 col-lg-10">
+            <span id="project-name-{{ project.id }}" style="color: white;">{{ project.name }}</span>
+            <form id="edit-project-form-{{ project.id }}" hx-patch="{{ project.id }}/" hx-target="#project-name-container-{{ project.id }}" hx-swap="innerHTML" style="display: none;">
+                <input type="text" name="project-name" value="{{ project.name }}" style="max-width: 70%;" required>
+                <button type="submit" class="btn" style="color: white;">&#x2713;</button>
+            </form>
+        </div>
+        <div class="col-5 col-md-3 col-lg-2">
+            <span class="btn" id="edit-pencil-{{ project.id }}" onclick="editProjectName({{ project.id }})" style="color: white;">&#x270E;</span>
+            <button type="button" class="btn" hx-delete="{{ project.id }}/" hx-target=".project-container-{{ project.id }}" hx-swap="delete" hx-trigger="click" >&#x1F5D1;</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-12 col-lg-11" style="border: 1px solid blue; background-color: lightgray;">
+        <div class="row justify-content-center">
+            <div class="custom-width"
+                 style="border: 1px solid blue; width: calc(100% - 8px); margin: 4px; background-color: white;">
+                <form hx-post="{{ project.id }}/tasks/" hx-target=".taskslist{{ project.id }}" hx-swap="beforeend"
+                      id="taskForm" >
+                    {% csrf_token %}
+                    <div class="mb-3 mt-3 input-group">
+                        <input type="text" class="form-control" name="name" id="name"
+                               placeholder="Enter task name">
+                        <button type="submit" class="btn btn-primary">Add task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 project{{ project.id }}tasks">
+        <div hx-get="{{ project.id }}/tasks/" hx-trigger="load" class="taskslist{{ project.id }}"></div>
+    </div>
+</div>
+</div>
