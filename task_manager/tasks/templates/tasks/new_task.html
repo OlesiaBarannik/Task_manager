@@ -1,86 +1,46 @@
-{% extends 'base.html' %}
-{% load static %}
+<!-- tasks/new_task.html -->
 
-{% block title %}
-Tasks
-{% endblock %}
+<div class="row project{{ task.project_id }}task{{ task.id }}">
+    <input type="date" name="deadline_{{ task.id }}" id="deadline_{{ task.id }}" value="{{ task.deadline|date:'Y-m-d' }}" hidden>
+    <div class="col-2" style="border: 1px solid blue;">
+        <input type="hidden" name="status_{{ task.id }}" value="{% if task.status == 'done' %}done{% else %}not_done{% endif %}">
+        <input type="checkbox" id="checkbox_{{ task.id }}" {% if task.status == 'done' %} checked {% endif %}>
+    </div>
 
-{% block content %}
-<div class="container">
-
-    <div class="container mt-3">
-    <h2>Tasks</h2>
-    <a href="/projects/">Back to projects</a>
-    <form action="./" id="taskForm">
-        {% csrf_token %}
-        <div class="mb-3 mt-3">
-            <div class="row">
-                <div class="col-md-2 mt-2">
-                    <input type="text" class="form-control" name="task-name" id="task-name" placeholder="Enter task name">
-                </div>
-                <div class="col-md-2 mt-2">
-                    <select class="form-control" name="task-status" id="task-status">
-                        <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="done">Done</option>
-                    </select>
-                </div>
-                <div class="col-md-2 mt-2">
-                    <input type="date" class="form-control" name="task-deadline" id="task-deadline">
-                </div>
-
-                <div class="col-md-2 mt-2">
-                    <input type="number" class="form-control" name="task-priority" id="task-priority" min="1" max="1000" placeholder="Enter task priority">
-                </div>
-                <div class="col-md-2 mt-2">
-                    <button type="submit" class="btn btn-success">Create Task</button>
+    <div class="col-7 col-md-8 col-lg-8" style="border: 1px solid blue;">
+        <span id="taskName_{{ task.id }}">{{ task.name }}</span>
+    </div>
+    <div class="col-3 col-md-2 col-lg-1" style="border: 1px solid blue;">
+        <div class="d-flex justify-content-end align-items-center" style="margin: 0 2px; align-items: center;">
+            <div class="col-auto p-0" style="align-content: center;">
+                <span class="btn p-0 m-0" data-bs-toggle="modal" data-bs-target="#myModal" data-task-id="{{ task.id }}" data-project-id="{{ task.project_id }}">&#x270E;</span>
+            </div>
+            <div class="col-auto p-0" style="align-content: center">
+                <span class="btn p-0 m-0" hx-delete="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}task{{ task.id }}" hx-swap="delete" hx-trigger="click" >&#x1F5D1;</span>
+            </div>
+            <div class="col-auto p-0" style="align-content: center">
+                <div class="btn p-0 m-0" style="line-height: 0.8;">
+                    <span hx-patch="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}tasks" hx-swap="innerHTML" hx-trigger="click" hx-vals='{"priority_up": {{ task.priority }} }' style="display: block;">&#9650;</span>
+                    <span hx-patch="{{ task.project_id }}/tasks/{{ task.id }}" hx-target=".project{{ task.project_id }}tasks" hx-swap="innerHTML" hx-trigger="click" hx-vals='{"priority_down": {{ task.priority }} }' style="display: block;">&#9660;</span>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 
-    <!-- Table for displaying the list of tasks -->
-    <table class="table table-hover" id="tasksTable">
-        <thead>
-            <tr>
-                <th style="width: 25%;">name</th>
-                <th style="width: 22%;">status</th>
-                <th style="width: 23%;">deadline</th>
-                <th style="width: 5%;">priority</th>
-                <th style="width: 25%; text-align: right;">actions</th>
-                <th hidden></th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for task in tasks_list %}
-        <tr>
-            <td>{{ task.name }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.deadline|date:"Y-m-d" }}</td>
-            <td>{{ task.priority }}</td>
-            <td style="text-align: right;">
-                <button class="btn btn-sm mb-2 edit-btn">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-                <button class="btn btn-sm mb-2 del-btn" onclick="delete_task(this, '{{ task.id }}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-            <td hidden>{{ task.id }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+<script>
+document.getElementById('checkbox_{{ task.id }}').addEventListener('change', function() {
+    var hiddenInput = document.querySelector('input[name="status_{{ task.id }}"]');
+    if (this.checked) {
+        hiddenInput.value = 'done';
+    } else {
+        hiddenInput.value = 'in_progress';
+    }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-{% block extrajs %}
-<script src="{% static 'tasks/js/sort_table.js' %}"></script>
-<script src="{% static 'tasks/js/add_task.js' %}"></script>
-<script src="{% static 'tasks/js/edit_task.js' %}"></script>
-<script src="{% static 'tasks/js/delete_task.js' %}"></script>
-{% endblock %}
-
-{% endblock %}
+    htmx.ajax('PATCH', '{{ task.project_id }}/tasks/{{ task.id }}', {
+        target: '#response',
+        swap: 'outerHTML',
+        values: { status: hiddenInput.value }
+    });
+});
+</script>
