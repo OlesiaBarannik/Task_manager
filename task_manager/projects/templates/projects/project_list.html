@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% for project in project_list %}
+<div class="row project-container-{{ project.id }}">
+<div class="row pt-5">
+    <div class="col-12 col-md-12 col-lg-11 d-flex align-items-center" id="project-name-container-{{ project.id }}" style="border: 1px solid blue; background-color: blue; color: white;">
+        <div class="col-7 col-md-9 col-lg-10">
+            <span id="project-name-{{ project.id }}" style="color: white;">{{ project.name }}</span>
+            <form id="edit-project-form-{{ project.id }}" hx-patch="{{ project.id }}/" hx-target="#project-name-container-{{ project.id }}" hx-swap="innerHTML" style="display: none;">
+                <input type="text" name="project-name" value="{{ project.name }}" style="max-width: 70%;" required>
+                <button type="submit" class="btn" style="color: white;">&#x2713;</button>
+            </form>
+        </div>
+        <div class="col-5 col-md-3 col-lg-2">
+            <span class="btn" id="edit-pencil-{{ project.id }}" onclick="editProjectName({{ project.id }})" style="color: white;">&#x270E;</span>
+            <button type="button" class="btn" hx-delete="{{ project.id }}/" hx-target=".project-container-{{ project.id }}" hx-swap="delete" hx-trigger="click" >&#x1F5D1;</button>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12 col-md-12 col-lg-11" style="border: 1px solid blue; background-color: lightgray;">
+        <div class="row justify-content-center">
+            <div class="custom-width"
+                 style="border: 1px solid blue; width: calc(100% - 8px); margin: 4px; background-color: white;">
+                <form hx-post="{{ project.id }}/tasks/" hx-target=".taskslist{{ project.id }}" hx-swap="beforeend"
+                      id="taskForm" >
+                    {% csrf_token %}
+                    <div class="mb-3 mt-3 input-group">
+                        <input type="text" class="form-control" name="name" id="name"
+                               placeholder="Enter task name">
+                        <button type="submit" class="btn btn-primary">Add task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 project{{ project.id }}tasks">
+        <div hx-get="{{ project.id }}/tasks/" hx-trigger="load" class="taskslist{{ project.id }}"></div>
+    </div>
+</div>
+</div>
+{% endfor %}
+
+
+<!-- The Modal -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Edit Task</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <!-- Name field -->
+                    <div class="mb-3">
+                        <label for="taskname" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="taskname" name="name">
+                    </div>
+                    <!-- Deadline field -->
+                    <div class="mb-3">
+                        <label for="taskdeadline" class="form-label">Deadline:</label>
+                        <input type="date" class="form-control" id="taskdeadline" name="deadline">
+                    </div>
+                    <!-- CSRF token -->
+                    {% csrf_token %}
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="submit" form="editTaskForm" class="btn btn-primary">Save changes</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- The Modal -->
+<div class="modal fade" id="errorModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Error massage</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">вапапрапуппкепк</div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    let projectId, taskId;
+    document.body.addEventListener('click', function(event) {
+        if (event.target.matches('[data-bs-target="#myModal"]')) {
+            taskId = event.target.getAttribute('data-task-id');
+            projectId = event.target.getAttribute('data-project-id');
+            console.log(taskId + " | " + projectId);
+
+            var taskNameElement = document.querySelector('#taskName_' + taskId);
+            var modalNameInput = document.getElementById('taskname');
+            modalNameInput.value = taskNameElement.innerText.trim();
+
+            var taskDeadlineElement = document.querySelector('#deadline_' + taskId);
+            var modalDeadlineInput = document.getElementById('taskdeadline');
+            modalDeadlineInput.value = taskDeadlineElement.value;
+
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('editTaskForm').addEventListener('submit', function(event) {
+        let new_taskname = document.getElementById('taskname').value
+        let new_taskdeadline = document.getElementById('taskdeadline').value
+        console.log(projectId + '/tasks/' + taskId)
+        event.preventDefault(); // Prevent default form submission
+        var formData = {
+            "name": new_taskname,
+            "deadline": new_taskdeadline
+        }
+        htmx.ajax('PATCH', projectId + "/tasks/" + taskId, {
+            target: '#response',
+            swap: 'outerHTML',
+            values: formData,
+        });
+
+        var modal = document.getElementById('myModal');
+        var modalInstance = bootstrap.Modal.getInstance(modal);
+        modalInstance.hide();
+        document.querySelector('#taskName_' + taskId).innerHTML = new_taskname
+        document.querySelector('#deadline_' + taskId).value = new_taskdeadline
+    });
+});
+
+function editProjectName(projectID) {
+    document.getElementById('edit-pencil-' + projectID).style.display = 'none';
+    document.getElementById('project-name-' + projectID).style.display = 'none';
+    document.getElementById('edit-project-form-' + projectID).style.display = 'block';
+}
+
+
+document.addEventListener('htmx:responseError', function(event) {
+    try {
+        // Отримати JSON з відповіді
+        var response = JSON.parse(event.detail.xhr.responseText);
+
+        // Отримати текст помилки з відповіді
+        var errorText = response.message || 'An error occurred.';
+
+        // Вставити текст помилки в модальне вікно
+        var modalBody = document.querySelector('#errorModal .modal-body');
+        modalBody.textContent = errorText;
+
+        // Показати модальне вікно з помилкою
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    } catch (e) {
+        console.error('Error parsing JSON response');
+    }
+});
+
+
+
+</script>
+
+
+
+
+
+
+
+
+{% endblock %}
