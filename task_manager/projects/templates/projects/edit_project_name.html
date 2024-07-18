@@ -1,0 +1,11 @@
+<div class="col-7 col-md-9 col-lg-10">
+<span id="project-name-{{ project.id }}" style="color: white;">{{ project.name }}</span>
+<form id="edit-project-form-{{ project.id }}" hx-patch="{{ project.id }}/" hx-target="#project-name-container-{{ project.id }}" hx-swap="innerHTML" style="display: none;">
+    <input type="text" name="project-name" value="{{ project.name }}" style="max-width: 70%;" required>
+    <button type="submit" class="btn" style="color: white;">&#x2713;</button>
+</form>
+</div>
+<div class="col-5 col-md-3 col-lg-2">
+<span class="btn" id="edit-pencil-{{ project.id }}" onclick="editProjectName({{ project.id }})" style="color: white;">&#x270E;</span>
+<button type="button" class="btn" hx-delete="{{ project.id }}/" hx-target=".project-container-{{ project.id }}" hx-swap="delete" hx-trigger="click" >&#x1F5D1;</button>
+</div>
