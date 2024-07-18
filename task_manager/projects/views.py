@@ -1,11 +1,14 @@
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseNotAllowed, HttpResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-
+from django.template.loader import render_to_string
+from django.http.request import QueryDict
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.views import View
 from .models import Project
-import json
 
 
 class ProjectView(View):
@@ -16,29 +19,40 @@ class ProjectView(View):
     def get(self, request):
         projects = Project.objects.all()
         project_list = [{'id': project.id, 'name': project.name} for project in projects]
-        if request.headers.get('Content-Type') == 'application/json':
-            return JsonResponse(project_list, safe=False)
-        return render(request, 'projects/projects.html', {'project_list': project_list})
+        return render(request, 'projects/project_list.html', {'project_list': project_list})
 
     def post(self, request):
-        data = json.loads(request.body)
-        name = data.get('project')
+        name = request.POST.get('name', 'New Project')
+
+        try:
+            Project.validate_project_name(name)
+        except ValidationError as e:
+            error_message = str(e)
+            return JsonResponse({'message': error_message}, status=400)
+
         new_project = Project.objects.create(name=name)
         new_project.save()
-        return JsonResponse({'id': new_project.id, 'name': new_project.name})
+        project_html = render_to_string('projects/new_project.html', {'project': new_project})
+        return HttpResponse(project_html)
+
 
     def patch(self, request, project_id):
-        data = json.loads(request.body)
-        new_name = data.get('project')
+        if request.method == 'PATCH':
+            data = QueryDict(request.body)
+            new_name = data.get('project-name')
+            if new_name:
+                project = get_object_or_404(Project, id=project_id)
+                project.name = new_name
+                try:
+                    Project.validate_project_name(project.name, project.id)
+                except ValidationError as e:
+                    error_message = str(e)
+                    return JsonResponse({'message': error_message}, status=400)
+                project.save()
+        return render(request, 'projects/edit_project_name.html', {'project': project})
 
-        updated_project, _ = Project.objects.update_or_create(
-            id=project_id,
-            defaults={'name': new_name}
-        )
-
-        return JsonResponse({'id': updated_project.id, 'name': updated_project.name})
 
     def delete(self, request, project_id):
         project = Project.objects.filter(id=project_id)
         project.delete()
-        return JsonResponse({'status': 'success'})
+        return HttpResponse()
